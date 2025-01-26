@@ -1,0 +1,26 @@
+{
+    "tasks": [
+        {
+            "task_key": "training_task",
+            "existing_cluster_id": "1111-153022-hh2pozt4",
+            "notebook_task": {
+                "notebook_path": "/Workspace/Users/d.t.georgian.pirvu@axpo.com/ML_e2e_Databricks/training"
+            },
+            "libraries": [
+                {
+                    "pypi": {
+                        "package": "scikit-learn"
+                    }
+                },
+                {
+                    "pypi": {
+                        "package": "mlflow"
+                    }
+                }
+            ]
+        }
+    ],
+    "run_name": "Penguin Training Job",
+    "max_concurrent_runs": 1,
+    "timeout_seconds": 7200
+}
