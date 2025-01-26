@@ -209,11 +209,12 @@ with mlflow.start_run(run_name="cross-validation") as parent_run:
                 verbose=1
             )
         
-        # Evaluate model
+            # Evaluate model
+            test_loss, test_accuracy = model.evaluate(x_test, y_test, verbose=0)
             mlflow.log_metric("test_accuracy", test_accuracy)
             mlflow.log_metric("test_loss", test_loss)
 
-    # Log training history metrics
+            # Log training history metrics
             for epoch, metrics in enumerate(history.history['accuracy']):
                 mlflow.log_metric("train_accuracy", metrics, step=epoch)
                 mlflow.log_metric("train_loss", history.history['loss'][epoch], step=epoch)
