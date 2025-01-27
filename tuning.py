@@ -1,6 +1,7 @@
 # Databricks notebook source
 import logging
 import os
+import json
 from typing import Dict, Any
 
 import mlflow
@@ -238,12 +239,45 @@ def run_hyperparameter_tuning(X_train, y_train, X_val, y_val):
             for name, value in best_hp.values.items()
         })
         
-        # Log best model
+        # Define input and output schema
+        input_schema = {
+            "inputs": [
+                {"name": "culmen_length_mm", "type": "double"},
+                {"name": "culmen_depth_mm", "type": "double"},
+                {"name": "flipper_length_mm", "type": "double"},
+                {"name": "body_mass_g", "type": "double"},
+                {"name": "island", "type": "string"},
+                {"name": "sex", "type": "string"}
+            ]
+        }
+        
+        output_schema = {
+            "outputs": [
+                {"name": "prediction", "type": "string"},
+                {"name": "confidence", "type": "double"}
+            ]
+        }
+        
+        # Log best model with schema information
         mlflow.keras.log_model(
             best_model,
             "best_model",
-            registered_model_name="penguin_classifier_tuned"
+            registered_model_name="penguin_classifier_tuned",
+            input_example=X_train.iloc[0:1],
+            signature=mlflow.models.infer_signature(
+                X_train, 
+                [{"prediction": "Adelie", "confidence": 0.95}]
+            )
         )
+        
+        # Log the raw schema as artifacts for documentation
+        with open("/dbfs/tmp/input_schema.json", "w") as f:
+            json.dump(input_schema, f, indent=2)
+        with open("/dbfs/tmp/output_schema.json", "w") as f:
+            json.dump(output_schema, f, indent=2)
+            
+        mlflow.log_artifact("/dbfs/tmp/input_schema.json")
+        mlflow.log_artifact("/dbfs/tmp/output_schema.json")
         
         return best_hp, best_model
 
