@@ -326,28 +326,37 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
             )[0][0]
             y_example_confidence = y_example_proba.max()
             
-            # Import TensorFlow for TensorSpec
+            # Import necessary modules
             import tensorflow as tf
+            from mlflow.types import Schema, ColSpec, DataType
             
-            # Create signature with TensorSpec
+            # Create input schema with TensorFlow-like specifications
+            input_schema = Schema([
+                ColSpec(DataType.double, "culmen_length_mm"),
+                ColSpec(DataType.double, "culmen_depth_mm"),
+                ColSpec(DataType.double, "flipper_length_mm"),
+                ColSpec(DataType.double, "body_mass_g"),
+                ColSpec(DataType.string, "island"),
+                ColSpec(DataType.string, "sex")
+            ])
+            
+            # Create output schema
+            output_schema = Schema([
+                ColSpec(DataType.string, "prediction"),
+                ColSpec(DataType.double, "confidence")
+            ])
+            
+            # Create signature
             signature = mlflow.models.signature.ModelSignature(
-                inputs=tf.TensorSpec(
-                    shape=(None, X_example.shape[1]), 
-                    dtype=tf.float32, 
-                    name="inputs"
-                ),
-                outputs=tf.TensorSpec(
-                    shape=(None, y_example_proba.shape[1]), 
-                    dtype=tf.float32, 
-                    name="outputs"
-                )
+                inputs=input_schema,
+                outputs=output_schema
             )
             
             # Log the Keras model with signature
             mlflow.keras.log_model(
                 model,
                 "model",
-                input_example=X_example,
+                input_example=example_input,
                 signature=signature,
                 registered_model_name="penguin_classifier"
             )
