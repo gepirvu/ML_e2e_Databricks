@@ -191,7 +191,15 @@ class PenguinClassifier:
             if missing_features:
                 raise ValueError(f"Missing required input features: {missing_features}")
             
-            # Ensure numeric columns are float
+            # Log input data types for debugging
+            logging.info("Input data types:")
+            for col in data.columns:
+                logging.info(f"{col}: {data[col].dtype}")
+            
+            # Create a new DataFrame with correct types and order
+            processed_data = pd.DataFrame()
+            
+            # Process numeric columns first
             numeric_columns = [
                 "culmen_length_mm",
                 "culmen_depth_mm",
@@ -199,27 +207,36 @@ class PenguinClassifier:
                 "body_mass_g"
             ]
             for col in numeric_columns:
-                data[col] = pd.to_numeric(data[col], errors='coerce')
+                processed_data[col] = pd.to_numeric(data[col], errors='coerce')
             
-            # Handle missing values in categorical columns
-            data['island'] = data['island'].fillna('NA')
-            data['sex'] = data['sex'].fillna('NA')
+            # Process categorical columns
+            processed_data['island'] = data['island'].astype(str).fillna('NA')
+            processed_data['sex'] = data['sex'].astype(str).fillna('NA')
             
-            # Validate data types using Spark schema
-            try:
-                spark_df = self.spark.createDataFrame(data, schema=self.input_schema)
-                data = spark_df.toPandas()
-            except Exception as e:
-                logging.error(f"Schema validation failed: {str(e)}")
-                return None
+            # Reorder columns to match schema
+            column_order = [
+                "culmen_length_mm",
+                "culmen_depth_mm",
+                "flipper_length_mm",
+                "body_mass_g",
+                "island",
+                "sex"
+            ]
+            processed_data = processed_data[column_order]
+            
+            # Log processed data types for debugging
+            logging.info("Processed data types:")
+            for col in processed_data.columns:
+                logging.info(f"{col}: {processed_data[col].dtype}")
             
             # Transform features using the transformer
-            result = self.features_transformer.transform(data)
+            result = self.features_transformer.transform(processed_data)
             logging.info("Features transformed successfully")
             return result
             
         except Exception as e:
             logging.error(f"Error processing input: {str(e)}")
+            logging.error("Data shape: %s", data.shape if 'data' in locals() else 'Not available')
             return None
     
     def process_output(self, predictions: np.ndarray) -> List[Dict[str, Any]]:
