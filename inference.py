@@ -62,16 +62,16 @@ def load_registered_models() -> Tuple[tf.keras.Model, Any, Any, Dict]:
             ]
         }
         
-        # Load the main classifier model with schema validation
-        classifier = mlflow.keras.load_model(
-            "models:/penguin_classifier/latest",
-            validate_schema=True
-        )
+        # Load the main classifier model
+        classifier = mlflow.keras.load_model("models:/penguin_classifier/latest")
         
-        # Validate model has expected schema
-        model_info = mlflow.models.get_model_info("models:/penguin_classifier/latest")
-        if not model_info.signature:
-            logging.warning("Model loaded without schema signature. Input/output validation may be limited.")
+        # Check if model has signature
+        try:
+            model_info = mlflow.models.get_model_info("models:/penguin_classifier/latest")
+            if not model_info.signature:
+                logging.warning("Model loaded without schema signature. Input/output validation may be limited.")
+        except Exception as e:
+            logging.warning(f"Could not validate model signature: {str(e)}")
         
         # Load the transformers
         target_transformer = mlflow.sklearn.load_model("models:/penguin_target_transformer/latest")
