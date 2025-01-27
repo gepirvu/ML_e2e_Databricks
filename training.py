@@ -302,10 +302,43 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
         
         # Save the final model and transformers
         with mlflow.start_run(run_name="model-saving", nested=True):
-            # Log the Keras model - MLflow autolog will handle the model artifacts
+            # Create MLflow schema for model input and output
+            from mlflow.types import Schema, ColSpec, DataType
+            
+            input_schema = Schema([
+                ColSpec(DataType.string, "island"),
+                ColSpec(DataType.double, "culmen_length_mm"),
+                ColSpec(DataType.double, "culmen_depth_mm"),
+                ColSpec(DataType.double, "flipper_length_mm"),
+                ColSpec(DataType.double, "body_mass_g"),
+                ColSpec(DataType.string, "sex")
+            ])
+            
+            output_schema = Schema([
+                ColSpec(DataType.string, "prediction"),
+                ColSpec(DataType.double, "confidence")
+            ])
+            
+            # Create example input
+            example_input = pd.DataFrame({
+                "culmen_length_mm": [39.1],
+                "culmen_depth_mm": [18.7],
+                "flipper_length_mm": [181.0],
+                "body_mass_g": [3750.0],
+                "island": ["Torgersen"],
+                "sex": ["Male"]
+            })
+            
+            # Create model signature with proper schemas
+            from mlflow.models.signature import ModelSignature
+            signature = ModelSignature(inputs=input_schema, outputs=output_schema)
+            
+            # Log the Keras model with signature
             mlflow.keras.log_model(
                 model,
                 "model",
+                signature=signature,
+                input_example=example_input,
                 registered_model_name="penguin_classifier"
             )
             
@@ -322,23 +355,11 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
                 registered_model_name="penguin_features_transformer"
             )
             
-            # Log additional metadata including raw input/output schemas
+            # Log additional metadata
             metadata = {
                 "feature_names": feature_names,
                 "target_classes": target_classes,
                 "training_date": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "raw_input_schema": {
-                    "culmen_length_mm": "double",
-                    "culmen_depth_mm": "double",
-                    "flipper_length_mm": "double",
-                    "body_mass_g": "double",
-                    "island": "string",
-                    "sex": "string"
-                },
-                "raw_output_schema": {
-                    "prediction": "string",
-                    "confidence": "double"
-                },
                 "input_features_info": {
                     "numeric_features": [
                         "culmen_length_mm",
