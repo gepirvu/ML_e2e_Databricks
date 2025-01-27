@@ -42,8 +42,36 @@ def load_registered_models() -> Tuple[tf.keras.Model, Any, Any, Dict]:
     logging.info("Loading registered models from MLflow Model Registry...")
     
     try:
-        # Load the main classifier model
-        classifier = mlflow.keras.load_model("models:/penguin_classifier/latest")
+        # Define expected input schema
+        input_schema = {
+            "inputs": [
+                {"name": "culmen_length_mm", "type": "double"},
+                {"name": "culmen_depth_mm", "type": "double"},
+                {"name": "flipper_length_mm", "type": "double"},
+                {"name": "body_mass_g", "type": "double"},
+                {"name": "island", "type": "string"},
+                {"name": "sex", "type": "string"}
+            ]
+        }
+        
+        # Define expected output schema
+        output_schema = {
+            "outputs": [
+                {"name": "prediction", "type": "string"},
+                {"name": "confidence", "type": "double"}
+            ]
+        }
+        
+        # Load the main classifier model with schema validation
+        classifier = mlflow.keras.load_model(
+            "models:/penguin_classifier/latest",
+            validate_schema=True
+        )
+        
+        # Validate model has expected schema
+        model_info = mlflow.models.get_model_info("models:/penguin_classifier/latest")
+        if not model_info.signature:
+            logging.warning("Model loaded without schema signature. Input/output validation may be limited.")
         
         # Load the transformers
         target_transformer = mlflow.sklearn.load_model("models:/penguin_target_transformer/latest")
@@ -83,6 +111,29 @@ class PenguinClassifier:
             "island",
             "sex"
         ]
+        
+        # Define input schema for validation
+        self.input_schema = StructType([
+            StructField("culmen_length_mm", DoubleType(), True),
+            StructField("culmen_depth_mm", DoubleType(), True),
+            StructField("flipper_length_mm", DoubleType(), True),
+            StructField("body_mass_g", DoubleType(), True),
+            StructField("island", StringType(), True),
+            StructField("sex", StringType(), True)
+        ])
+        
+        # Define output schema for predictions table
+        self.prediction_schema = StructType([
+            StructField("island", StringType(), True),
+            StructField("culmen_length_mm", DoubleType(), True),
+            StructField("culmen_depth_mm", DoubleType(), True),
+            StructField("flipper_length_mm", DoubleType(), True),
+            StructField("body_mass_g", DoubleType(), True),
+            StructField("sex", StringType(), True),
+            StructField("prediction", StringType(), True),
+            StructField("confidence", DoubleType(), True),
+            StructField("prediction_time", TimestampType(), True)
+        ])
         
         self.target_classes = self.metadata.get("target_classes", [])
         self.enable_data_capture = enable_data_capture
@@ -132,6 +183,10 @@ class PenguinClassifier:
     def process_input(self, payload: pd.DataFrame) -> Optional[np.ndarray]:
         """Process the input data for prediction."""
         try:
+            # Validate input schema
+            spark_df = self.spark.createDataFrame(payload, schema=self.input_schema)
+            payload = spark_df.toPandas()  # This ensures data types are correct
+            
             # Validate input columns
             missing_features = set(self.required_features) - set(payload.columns)
             if missing_features:
@@ -176,20 +231,7 @@ class PenguinClassifier:
     def capture_data(self, input_data: pd.DataFrame, predictions: List[Dict[str, Any]]) -> None:
         """Capture input data and predictions to Delta table."""
         try:
-            # Define schema for the Delta table
-            prediction_schema = StructType([
-                StructField("island", StringType(), True),
-                StructField("culmen_length_mm", DoubleType(), True),
-                StructField("culmen_depth_mm", DoubleType(), True),
-                StructField("flipper_length_mm", DoubleType(), True),
-                StructField("body_mass_g", DoubleType(), True),
-                StructField("sex", StringType(), True),
-                StructField("prediction", StringType(), True),
-                StructField("confidence", DoubleType(), True),
-                StructField("prediction_time", TimestampType(), True)
-            ])
-            
-            # Create a new DataFrame with the correct column order and types
+            # Create a new DataFrame with the correct column order and types using the prediction schema
             data_dict = {
                 "island": input_data["island"].astype(str),
                 "culmen_length_mm": input_data["culmen_length_mm"].astype(float),
@@ -202,11 +244,11 @@ class PenguinClassifier:
                 "prediction_time": pd.to_datetime([p["prediction_time"] for p in predictions])
             }
             
-            # Create pandas DataFrame with explicit types
+            # Create pandas DataFrame
             pdf = pd.DataFrame(data_dict)
             
             # Convert to Spark DataFrame with schema
-            spark_df = self.spark.createDataFrame(pdf, schema=prediction_schema)
+            spark_df = self.spark.createDataFrame(pdf, schema=self.prediction_schema)
             
             # Write to Delta table
             table_name = "penguin_predictions"
