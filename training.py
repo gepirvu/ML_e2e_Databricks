@@ -326,20 +326,21 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
             )[0][0]
             y_example_confidence = y_example_proba.max()
             
-            # Create MLflow signature
-            signature = mlflow.models.infer_signature(
-                model_input={
-                    "island": "Torgersen",
-                    "culmen_length_mm": 39.1,
-                    "culmen_depth_mm": 18.7,
-                    "flipper_length_mm": 181.0,
-                    "body_mass_g": 3750.0,
-                    "sex": "Male"
-                },
-                model_output={
-                    "prediction": y_example_class,
-                    "confidence": float(y_example_confidence)
-                }
+            # Import TensorFlow for TensorSpec
+            import tensorflow as tf
+            
+            # Create signature with TensorSpec
+            signature = mlflow.models.signature.ModelSignature(
+                inputs=tf.TensorSpec(
+                    shape=(None, X_example.shape[1]), 
+                    dtype=tf.float32, 
+                    name="inputs"
+                ),
+                outputs=tf.TensorSpec(
+                    shape=(None, y_example_proba.shape[1]), 
+                    dtype=tf.float32, 
+                    name="outputs"
+                )
             )
             
             # Log the Keras model with signature
