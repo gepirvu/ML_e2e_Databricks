@@ -317,6 +317,15 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
             if scipy.sparse.issparse(X_example):
                 X_example = X_example.toarray()
             
+            # Predict to get example output
+            y_example_proba = model.predict(X_example)
+            
+            # Convert probabilities to prediction and confidence
+            y_example_class = target_transformer.inverse_transform(
+                y_example_proba.argmax(axis=1).reshape(-1, 1)
+            )[0][0]
+            y_example_confidence = y_example_proba.max()
+            
             # Define input schema using TensorFlow's TensorSpec
             import tensorflow as tf
             input_schema = {
@@ -336,12 +345,28 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
                 )
             }
             
-            # Log the Keras model with TensorSpecs
+            # Create MLflow signature in the ml.school style
+            signature = mlflow.models.infer_signature(
+                model_input={
+                    "island": "Torgersen",
+                    "culmen_length_mm": 39.1,
+                    "culmen_depth_mm": 18.7,
+                    "flipper_length_mm": 181.0,
+                    "body_mass_g": 3750.0,
+                    "sex": "Male"
+                },
+                model_output={
+                    "prediction": y_example_class,
+                    "confidence": float(y_example_confidence)
+                }
+            )
+            
+            # Log the Keras model with both TensorSpec and MLflow signature
             mlflow.keras.log_model(
                 model,
                 "model",
                 input_example=X_example,
-                signature=input_schema,
+                signature=signature,
                 registered_model_name="penguin_classifier"
             )
             
@@ -361,7 +386,7 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
             # Log additional metadata including schema information
             metadata = {
                 "feature_names": feature_names,
-                "target_classes": target_classes,
+                "target_classes": target_transformer.categories_[0].tolist(),
                 "training_date": time.strftime("%Y-%m-%d %H:%M:%S"),
                 "input_features_info": {
                     "numeric_features": [
