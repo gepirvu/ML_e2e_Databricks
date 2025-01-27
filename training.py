@@ -304,17 +304,16 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
         with mlflow.start_run(run_name="model-saving", nested=True):
             # Create MLflow schema for model input and output
             from mlflow.types import Schema, ColSpec, DataType
-            from mlflow.types.schema import TensorSpec
-            from tensorflow import TensorShape, dtypes
+            import tensorflow as tf
 
             # Create input schema with TensorSpec
             input_schema = Schema([
-                TensorSpec(name="island", dtype=dtypes.string, shape=(None,)),
-                TensorSpec(name="culmen_length_mm", dtype=dtypes.float32, shape=(None,)),
-                TensorSpec(name="culmen_depth_mm", dtype=dtypes.float32, shape=(None,)),
-                TensorSpec(name="flipper_length_mm", dtype=dtypes.float32, shape=(None,)),
-                TensorSpec(name="body_mass_g", dtype=dtypes.float32, shape=(None,)),
-                TensorSpec(name="sex", dtype=dtypes.string, shape=(None,))
+                tf.TensorSpec(shape=(None,), dtype=tf.string, name="island"),
+                tf.TensorSpec(shape=(None,), dtype=tf.float32, name="culmen_length_mm"),
+                tf.TensorSpec(shape=(None,), dtype=tf.float32, name="culmen_depth_mm"),
+                tf.TensorSpec(shape=(None,), dtype=tf.float32, name="flipper_length_mm"),
+                tf.TensorSpec(shape=(None,), dtype=tf.float32, name="body_mass_g"),
+                tf.TensorSpec(shape=(None,), dtype=tf.string, name="sex")
             ])
 
             # Keep the output schema unchanged
