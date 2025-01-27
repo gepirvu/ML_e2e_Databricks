@@ -14,6 +14,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 from sklearn.model_selection import KFold
 import mlflow
 import pickle
+import scipy.sparse
 
 # COMMAND ----------
 
@@ -314,10 +315,14 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
             # Transform example input to get the correct tensor shape
             X_example = features_transformer.transform(example_input)
             
+            # Convert sparse matrix to dense numpy array if needed
+            if scipy.sparse.issparse(X_example):
+                X_example = X_example.toarray()
+            
             # Create model signature using transformed input
             import tensorflow as tf
             model_signature = mlflow.models.infer_signature(
-                X_example,  # Transformed input (numpy array)
+                X_example,  # Transformed input (dense numpy array)
                 model.predict(X_example)  # Model output
             )
             
@@ -327,18 +332,23 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
                 "model",
                 registered_model_name="penguin_classifier",
                 signature=model_signature,
-                input_example=X_example  # Use transformed input as example
+                input_example=X_example.tolist()  # Convert to list for JSON serialization
             )
             
-            # Create transformer signatures
+            # Create transformer signatures and convert to dense if needed
+            X_transformed = features_transformer.transform(example_input)
+            if scipy.sparse.issparse(X_transformed):
+                X_transformed = X_transformed.toarray()
+                
             features_transformer_signature = mlflow.models.infer_signature(
                 example_input,
-                features_transformer.transform(example_input)
+                X_transformed
             )
             
+            y_transformed = target_transformer.transform([["Adelie"]])
             target_transformer_signature = mlflow.models.infer_signature(
                 pd.DataFrame({"species": ["Adelie"]}),
-                target_transformer.transform([["Adelie"]])
+                y_transformed
             )
             
             # Log transformers as artifacts with signatures
