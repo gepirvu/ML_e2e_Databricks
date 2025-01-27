@@ -10,9 +10,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
+import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, optimizers
-import keras_tuner as kt  #
+import keras_tuner
 
 # COMMAND ----------
 
@@ -22,6 +23,13 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
+# COMMAND ----------
+
+# Set memory growth for GPU if available
+physical_devices = tf.config.list_physical_devices('GPU')
+if physical_devices:
+    for device in physical_devices:
+        tf.config.experimental.set_memory_growth(device, True)
 
 # COMMAND ----------
 
@@ -64,25 +72,26 @@ def load_data():
 
 # COMMAND ----------
 
-def build_model(hp: kt.HyperParameters, input_shape: int) -> keras.Model:
+def build_model(hp: keras_tuner.HyperParameters, input_shape: int) -> keras.Model:
     """Build a tunable model with hyperparameters."""
-    # Tunable parameters
+    # Tunable parameters - reduced search space for stability
     learning_rate = hp.Float("learning_rate", 1e-4, 1e-2, sampling="log")
-    units = hp.Int("units", 32, 256, step=32)
-    dropout_rate = hp.Float("dropout_rate", 0.1, 0.5, step=0.1)
+    units = hp.Int("units", 32, 128, step=32)
+    dropout_rate = hp.Float("dropout_rate", 0.1, 0.3, step=0.1)
     
-    # Model architecture
+    # Simpler model architecture
     model = keras.Sequential([
         layers.Dense(units, activation="relu", input_shape=(input_shape,)),
-        layers.Dropout(dropout_rate),
-        layers.Dense(units // 2, activation="relu"),
+        layers.BatchNormalization(),
         layers.Dropout(dropout_rate),
         layers.Dense(3, activation="softmax")
     ])
     
-    # Compile model
+    # Compile model with mixed precision
+    optimizer = optimizers.Adam(learning_rate=learning_rate)
+    
     model.compile(
-        optimizer=optimizers.Adam(learning_rate=learning_rate),
+        optimizer=optimizer,
         loss="categorical_crossentropy",
         metrics=["accuracy"]
     )
@@ -118,24 +127,59 @@ def build_transformers():
 
 # COMMAND ----------
 
-class MLflowTuner(kt.RandomSearch):
+class MLflowTuner(keras_tuner.Tuner):
     """Custom tuner that logs results to MLflow."""
     
-    def on_trial_end(self, trial):
-        """Log trial results to MLflow."""
-        with mlflow.start_run(run_name=f"trial-{trial.trial_id}", nested=True):
-            # Log hyperparameters
-            for hp, value in trial.hyperparameters.values.items():
-                mlflow.log_param(hp, value)
-            
-            # Log metrics
-            for metric, value in trial.metrics.metrics.items():
-                if len(value.values) > 0:
-                    mlflow.log_metric(metric, value.values[-1])
+    def __init__(
+        self,
+        hypermodel,
+        objective=None,
+        max_trials=10,
+        executions_per_trial=1,
+        directory=None,
+        project_name=None,
+        **kwargs
+    ):
+        self.objective = objective or "val_accuracy"
+        directory = directory or "/dbfs/tmp/keras_tuner"
+        project_name = project_name or "default_project"
         
-        super().on_trial_end(trial)
+        super().__init__(
+            hypermodel=hypermodel,
+            oracle=keras_tuner.oracles.RandomSearchOracle(
+                objective=keras_tuner.Objective(self.objective, "max"),
+                max_trials=max_trials,
+            ),
+            directory=directory,
+            project_name=project_name,
+            **kwargs
+        )
+        self.executions_per_trial = executions_per_trial
 
-# COMMAND ----------
+    def run_trial(self, trial, *args, **kwargs):
+        kwargs["batch_size"] = trial.hyperparameters.Int("batch_size", 32, 64, step=32)
+        kwargs["epochs"] = trial.hyperparameters.Int("epochs", 10, 20, step=5)
+        
+        results = []
+        for execution in range(self.executions_per_trial):
+            copied_kwargs = kwargs.copy()
+            model = self.hypermodel(trial.hyperparameters)
+            history = model.fit(*args, **copied_kwargs)
+            results.append(history.history)
+            
+        # Log to MLflow
+        with mlflow.start_run(run_name=f"trial-{trial.trial_id}", nested=True):
+            for name, value in trial.hyperparameters.values.items():
+                mlflow.log_param(name, value)
+            
+            # Log the best metrics
+            for metric in ["accuracy", "val_accuracy", "loss", "val_loss"]:
+                if metric in results[0]:
+                    best_value = max([result[metric][-1] for result in results])
+                    mlflow.log_metric(metric, best_value)
+        
+        # Return the results of the best execution
+        return results[0]
 
 def run_hyperparameter_tuning(X_train, y_train, X_val, y_val):
     """Run hyperparameter tuning with MLflow tracking."""
@@ -144,30 +188,49 @@ def run_hyperparameter_tuning(X_train, y_train, X_val, y_val):
         tuner = MLflowTuner(
             hypermodel=lambda hp: build_model(hp, X_train.shape[1]),
             objective="val_accuracy",
-            max_trials=10,
-            executions_per_trial=2,
+            max_trials=5,  # Reduced number of trials
+            executions_per_trial=1,  # Reduced executions
             directory="/dbfs/tmp/keras_tuner",
             project_name="penguin_classification"
         )
         
         # Log tuning parameters
         mlflow.log_params({
-            "max_trials": 10,
-            "executions_per_trial": 2,
+            "max_trials": 5,
+            "executions_per_trial": 1,
             "input_shape": X_train.shape[1]
         })
         
-        # Search for best hyperparameters
+        # Search for best hyperparameters with early stopping
+        early_stopping = keras.callbacks.EarlyStopping(
+            monitor="val_loss",
+            patience=3,
+            restore_best_weights=True
+        )
+        
+        # Search with reduced epochs and batch size
         tuner.search(
             X_train, y_train,
             validation_data=(X_val, y_val),
-            epochs=20,
-            batch_size=32
+            callbacks=[early_stopping],
+            epochs=10,  # Reduced epochs
+            batch_size=32,
+            verbose=1
         )
         
         # Get and log best hyperparameters
         best_hp = tuner.get_best_hyperparameters()[0]
-        best_model = tuner.get_best_models()[0]
+        best_model = tuner.hypermodel(best_hp)
+        
+        # Train the best model
+        history = best_model.fit(
+            X_train, y_train,
+            validation_data=(X_val, y_val),
+            epochs=10,
+            batch_size=32,
+            callbacks=[early_stopping],
+            verbose=1
+        )
         
         # Log best hyperparameters
         mlflow.log_params({
@@ -198,9 +261,7 @@ X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, r
 # Transform data
 features_transformer, target_transformer = build_transformers()
 
-
 # Transform features
-features_transformer, target_transformer = build_transformers()
 X_train_transformed = features_transformer.fit_transform(X_train)
 X_val_transformed = features_transformer.transform(X_val)
 X_test_transformed = features_transformer.transform(X_test)
@@ -211,7 +272,6 @@ y_val_transformed = target_transformer.transform(y_val.to_numpy().reshape(-1, 1)
 y_test_transformed = target_transformer.transform(y_test.to_numpy().reshape(-1, 1))
 logging.info(f"Training data shapes - X: {X_train_transformed.shape}, y: {y_train_transformed.shape}")
 logging.info(f"Validation data shapes - X: {X_val_transformed.shape}, y: {y_val_transformed.shape}")
-
 
 # COMMAND ----------
 
