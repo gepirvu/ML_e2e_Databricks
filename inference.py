@@ -183,21 +183,35 @@ class PenguinClassifier:
     def process_input(self, payload: pd.DataFrame) -> Optional[np.ndarray]:
         """Process the input data for prediction."""
         try:
-            # Validate input schema
-            spark_df = self.spark.createDataFrame(payload, schema=self.input_schema)
-            payload = spark_df.toPandas()  # This ensures data types are correct
+            # Make a copy to avoid modifying the original data
+            data = payload.copy()
             
             # Validate input columns
-            missing_features = set(self.required_features) - set(payload.columns)
+            missing_features = set(self.required_features) - set(data.columns)
             if missing_features:
                 raise ValueError(f"Missing required input features: {missing_features}")
             
-            # Clean the data
-            data = payload.copy()
+            # Ensure numeric columns are float
+            numeric_columns = [
+                "culmen_length_mm",
+                "culmen_depth_mm",
+                "flipper_length_mm",
+                "body_mass_g"
+            ]
+            for col in numeric_columns:
+                data[col] = pd.to_numeric(data[col], errors='coerce')
             
             # Handle missing values in categorical columns
             data['island'] = data['island'].fillna('NA')
             data['sex'] = data['sex'].fillna('NA')
+            
+            # Validate data types using Spark schema
+            try:
+                spark_df = self.spark.createDataFrame(data, schema=self.input_schema)
+                data = spark_df.toPandas()
+            except Exception as e:
+                logging.error(f"Schema validation failed: {str(e)}")
+                return None
             
             # Transform features using the transformer
             result = self.features_transformer.transform(data)
@@ -272,17 +286,6 @@ class PenguinClassifier:
 
 def load_test_data() -> pd.DataFrame:
     """Load a sample of data for testing the inference pipeline."""
-    # Define schema
-    schema = StructType([
-        StructField("species", StringType(), True),
-        StructField("island", StringType(), True),
-        StructField("culmen_length_mm", DoubleType(), True),
-        StructField("culmen_depth_mm", DoubleType(), True),
-        StructField("flipper_length_mm", DoubleType(), True),
-        StructField("body_mass_g", DoubleType(), True),
-        StructField("sex", StringType(), True)
-    ])
-    
     try:
         # Read from Delta table
         data_location = "abfss://raw@cloudinfrastg.dfs.core.windows.net/00_data_source/"
@@ -290,12 +293,33 @@ def load_test_data() -> pd.DataFrame:
         dataset_path = data_location + file_name
         
         logging.info(f"Loading test data from: {dataset_path}")
+        
+        # Read data with explicit schema
+        schema = StructType([
+            StructField("species", StringType(), True),
+            StructField("island", StringType(), True),
+            StructField("culmen_length_mm", DoubleType(), True),
+            StructField("culmen_depth_mm", DoubleType(), True),
+            StructField("flipper_length_mm", DoubleType(), True),
+            StructField("body_mass_g", DoubleType(), True),
+            StructField("sex", StringType(), True)
+        ])
+        
         data = spark.read.csv(dataset_path, header=True, schema=schema)
         
         # Convert to pandas and take a small sample
         pdf = data.toPandas()
-        test_sample = pdf.sample(n=5, random_state=42)
         
+        # Store true species for evaluation
+        true_species = pdf['species'].copy()
+        
+        # Drop the species column as it's not needed for inference
+        test_sample = pdf.drop('species', axis=1).sample(n=5, random_state=42)
+        
+        # Store true species for comparison
+        test_sample.attrs['true_species'] = true_species[test_sample.index]
+        
+        logging.info("Test data loaded successfully")
         return test_sample
         
     except Exception as e:
@@ -318,9 +342,11 @@ try:
     
     # Display results
     if predictions:
-        for i, (pred, true) in enumerate(zip(predictions, test_data['species'])):
+        true_species = test_data.attrs.get('true_species', None)
+        for i, pred in enumerate(predictions):
             print(f"\nSample {i+1}:")
-            print(f"True species: {true}")
+            if true_species is not None:
+                print(f"True species: {true_species.iloc[i]}")
             print(f"Predicted species: {pred['prediction']} (confidence: {pred['confidence']:.3f})")
             print(f"Prediction time: {pred['prediction_time']}")
     else:
