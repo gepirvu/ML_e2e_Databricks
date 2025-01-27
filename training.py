@@ -326,26 +326,7 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
             )[0][0]
             y_example_confidence = y_example_proba.max()
             
-            # Define input schema using TensorFlow's TensorSpec
-            import tensorflow as tf
-            input_schema = {
-                "inputs": tf.TensorSpec(
-                    shape=[None, X_example.shape[1]], 
-                    dtype=tf.float32,
-                    name="inputs"
-                )
-            }
-            
-            # Define output schema
-            output_schema = {
-                "outputs": tf.TensorSpec(
-                    shape=[None, len(target_transformer.categories_[0])],
-                    dtype=tf.float32,
-                    name="outputs"
-                )
-            }
-            
-            # Create MLflow signature in the ml.school style
+            # Create MLflow signature
             signature = mlflow.models.infer_signature(
                 model_input={
                     "island": "Torgersen",
@@ -361,7 +342,7 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
                 }
             )
             
-            # Log the Keras model with both TensorSpec and MLflow signature
+            # Log the Keras model with signature
             mlflow.keras.log_model(
                 model,
                 "model",
@@ -408,10 +389,6 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
                 "raw_output_schema": {
                     "prediction": "string",
                     "confidence": "double"
-                },
-                "tensor_specs": {
-                    "input_shape": X_example.shape[1],
-                    "output_shape": len(target_transformer.categories_[0])
                 }
             }
             mlflow.log_dict(metadata, "metadata.json")
