@@ -311,16 +311,14 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
                 "sex": ["Male"]
             })
             
-            # Create example output for model signature
-            example_output = pd.DataFrame({
-                "prediction": ["Adelie"],
-                "confidence": [0.95]
-            })
+            # Transform example input to get the correct tensor shape
+            X_example = features_transformer.transform(example_input)
             
-            # Create model signature
+            # Create model signature using transformed input
+            import tensorflow as tf
             model_signature = mlflow.models.infer_signature(
-                example_input,  # Raw input format
-                example_output  # Expected output format
+                X_example,  # Transformed input (numpy array)
+                model.predict(X_example)  # Model output
             )
             
             # Save model using MLflow model registry with signature
@@ -329,7 +327,7 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
                 "model",
                 registered_model_name="penguin_classifier",
                 signature=model_signature,
-                input_example=example_input
+                input_example=X_example  # Use transformed input as example
             )
             
             # Create transformer signatures
@@ -358,12 +356,12 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
                 registered_model_name="penguin_features_transformer"
             )
             
-            # Log additional metadata
+            # Log additional metadata including raw input/output schemas
             metadata = {
                 "feature_names": feature_names,
                 "target_classes": target_classes,
                 "training_date": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "input_schema": {
+                "raw_input_schema": {
                     "culmen_length_mm": "double",
                     "culmen_depth_mm": "double",
                     "flipper_length_mm": "double",
@@ -371,7 +369,7 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
                     "island": "string",
                     "sex": "string"
                 },
-                "output_schema": {
+                "raw_output_schema": {
                     "prediction": "string",
                     "confidence": "double"
                 }
