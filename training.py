@@ -302,30 +302,6 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
         
         # Save the final model and transformers
         with mlflow.start_run(run_name="model-saving", nested=True):
-            # Create MLflow schema for model input and output
-            from mlflow.types import Schema, ColSpec, DataType
-            import tensorflow as tf
-
-            # Create input schema with TensorSpec
-            input_schema = Schema([
-                tf.TensorSpec(shape=(None,), dtype=tf.string, name="island"),
-                tf.TensorSpec(shape=(None,), dtype=tf.float32, name="culmen_length_mm"),
-                tf.TensorSpec(shape=(None,), dtype=tf.float32, name="culmen_depth_mm"),
-                tf.TensorSpec(shape=(None,), dtype=tf.float32, name="flipper_length_mm"),
-                tf.TensorSpec(shape=(None,), dtype=tf.float32, name="body_mass_g"),
-                tf.TensorSpec(shape=(None,), dtype=tf.string, name="sex")
-            ])
-
-            # Keep the output schema unchanged
-            output_schema = Schema([
-                ColSpec(DataType.string, "prediction"),
-                ColSpec(DataType.double, "confidence")
-            ])
-            
-            # Create model signature with proper schemas
-            from mlflow.models.signature import ModelSignature
-            signature = ModelSignature(inputs=input_schema, outputs=output_schema)
-            
             # Create example input and transform it
             example_input = pd.DataFrame({
                 "culmen_length_mm": [39.1],
@@ -341,12 +317,31 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
             if scipy.sparse.issparse(X_example):
                 X_example = X_example.toarray()
             
-            # Log the Keras model with signature
+            # Define input schema using TensorFlow's TensorSpec
+            import tensorflow as tf
+            input_schema = {
+                "inputs": tf.TensorSpec(
+                    shape=[None, X_example.shape[1]], 
+                    dtype=tf.float32,
+                    name="inputs"
+                )
+            }
+            
+            # Define output schema
+            output_schema = {
+                "outputs": tf.TensorSpec(
+                    shape=[None, len(target_transformer.categories_[0])],
+                    dtype=tf.float32,
+                    name="outputs"
+                )
+            }
+            
+            # Log the Keras model with TensorSpecs
             mlflow.keras.log_model(
                 model,
                 "model",
-                signature=signature,
-                input_example=X_example,  # Use transformed tensor input
+                input_example=X_example,
+                signature=input_schema,
                 registered_model_name="penguin_classifier"
             )
             
@@ -363,7 +358,7 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
                 registered_model_name="penguin_features_transformer"
             )
             
-            # Log additional metadata
+            # Log additional metadata including schema information
             metadata = {
                 "feature_names": feature_names,
                 "target_classes": target_classes,
@@ -376,6 +371,22 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
                         "body_mass_g"
                     ],
                     "categorical_features": ["island", "sex"]
+                },
+                "raw_input_schema": {
+                    "culmen_length_mm": "double",
+                    "culmen_depth_mm": "double",
+                    "flipper_length_mm": "double",
+                    "body_mass_g": "double",
+                    "island": "string",
+                    "sex": "string"
+                },
+                "raw_output_schema": {
+                    "prediction": "string",
+                    "confidence": "double"
+                },
+                "tensor_specs": {
+                    "input_shape": X_example.shape[1],
+                    "output_shape": len(target_transformer.categories_[0])
                 }
             }
             mlflow.log_dict(metadata, "metadata.json")
