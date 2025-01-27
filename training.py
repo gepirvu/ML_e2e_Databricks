@@ -301,34 +301,82 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
         
         # Save the final model and transformers
         with mlflow.start_run(run_name="model-saving", nested=True):
-            # Save model using MLflow model registry
+            # Create example input for model signature
+            example_input = pd.DataFrame({
+                "culmen_length_mm": [39.1],
+                "culmen_depth_mm": [18.7],
+                "flipper_length_mm": [181.0],
+                "body_mass_g": [3750.0],
+                "island": ["Torgersen"],
+                "sex": ["Male"]
+            })
+            
+            # Create example output for model signature
+            example_output = pd.DataFrame({
+                "prediction": ["Adelie"],
+                "confidence": [0.95]
+            })
+            
+            # Create model signature
+            model_signature = mlflow.models.infer_signature(
+                example_input,  # Raw input format
+                example_output  # Expected output format
+            )
+            
+            # Save model using MLflow model registry with signature
             mlflow.keras.log_model(
                 model,
                 "model",
-                registered_model_name="penguin_classifier"
+                registered_model_name="penguin_classifier",
+                signature=model_signature,
+                input_example=example_input
             )
             
-            # Log transformers as artifacts
+            # Create transformer signatures
+            features_transformer_signature = mlflow.models.infer_signature(
+                example_input,
+                features_transformer.transform(example_input)
+            )
+            
+            target_transformer_signature = mlflow.models.infer_signature(
+                pd.DataFrame({"species": ["Adelie"]}),
+                target_transformer.transform([["Adelie"]])
+            )
+            
+            # Log transformers as artifacts with signatures
             mlflow.sklearn.log_model(
                 target_transformer,
                 "transformers/target_transformer",
+                signature=target_transformer_signature,
                 registered_model_name="penguin_target_transformer"
             )
+            
             mlflow.sklearn.log_model(
                 features_transformer,
                 "transformers/features_transformer",
+                signature=features_transformer_signature,
                 registered_model_name="penguin_features_transformer"
             )
             
             # Log additional metadata
-            mlflow.log_dict(
-                {
-                    "feature_names": feature_names,
-                    "target_classes": target_classes,
-                    "training_date": time.strftime("%Y-%m-%d %H:%M:%S")
+            metadata = {
+                "feature_names": feature_names,
+                "target_classes": target_classes,
+                "training_date": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "input_schema": {
+                    "culmen_length_mm": "double",
+                    "culmen_depth_mm": "double",
+                    "flipper_length_mm": "double",
+                    "body_mass_g": "double",
+                    "island": "string",
+                    "sex": "string"
                 },
-                "metadata.json"
-            )
+                "output_schema": {
+                    "prediction": "string",
+                    "confidence": "double"
+                }
+            }
+            mlflow.log_dict(metadata, "metadata.json")
             
             logging.info("Final model and transformers saved successfully to MLflow Model Registry")
 else:
