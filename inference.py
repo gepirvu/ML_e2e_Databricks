@@ -73,15 +73,25 @@ class PenguinClassifier:
             enable_data_capture: If True, will log predictions to Delta table
         """
         self.model, self.target_transformer, self.features_transformer, self.metadata = load_registered_models()
-        self.feature_names = self.metadata.get("feature_names", [])
+        
+        # Define required input features (before transformation)
+        self.required_features = [
+            "culmen_length_mm",
+            "culmen_depth_mm",
+            "flipper_length_mm",
+            "body_mass_g",
+            "island",
+            "sex"
+        ]
+        
         self.target_classes = self.metadata.get("target_classes", [])
         self.enable_data_capture = enable_data_capture
         
         # Initialize Spark for data capture
         self.spark = SparkSession.builder.getOrCreate()
         
-        logging.info("Classifier initialized with %d features and %d classes", 
-                    len(self.feature_names), len(self.target_classes))
+        logging.info("Classifier initialized with %d input features and %d classes", 
+                    len(self.required_features), len(self.target_classes))
     
     def predict(self, input_data: pd.DataFrame, 
                capture_data: Optional[bool] = None) -> Optional[List[Dict[str, Any]]]:
@@ -123,12 +133,19 @@ class PenguinClassifier:
         """Process the input data for prediction."""
         try:
             # Validate input columns
-            missing_features = set(self.feature_names) - set(payload.columns)
+            missing_features = set(self.required_features) - set(payload.columns)
             if missing_features:
-                raise ValueError(f"Missing required features: {missing_features}")
+                raise ValueError(f"Missing required input features: {missing_features}")
             
-            # Transform features
-            result = self.features_transformer.transform(payload)
+            # Clean the data
+            data = payload.copy()
+            
+            # Handle missing values in categorical columns
+            data['island'] = data['island'].fillna('NA')
+            data['sex'] = data['sex'].fillna('NA')
+            
+            # Transform features using the transformer
+            result = self.features_transformer.transform(data)
             logging.info("Features transformed successfully")
             return result
             
@@ -167,9 +184,14 @@ class PenguinClassifier:
             data['confidence'] = [p['confidence'] for p in predictions]
             data['prediction_time'] = [p['prediction_time'] for p in predictions]
             
-            # Convert to Spark DataFrame
+            # Convert to Spark DataFrame with proper schema
             prediction_schema = StructType([
-                *[StructField(name, DoubleType(), True) for name in self.feature_names],
+                StructField("island", StringType(), True),
+                StructField("culmen_length_mm", DoubleType(), True),
+                StructField("culmen_depth_mm", DoubleType(), True),
+                StructField("flipper_length_mm", DoubleType(), True),
+                StructField("body_mass_g", DoubleType(), True),
+                StructField("sex", StringType(), True),
                 StructField("prediction", StringType(), True),
                 StructField("confidence", DoubleType(), True),
                 StructField("prediction_time", TimestampType(), True)
