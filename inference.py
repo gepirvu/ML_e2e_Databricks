@@ -176,15 +176,7 @@ class PenguinClassifier:
     def capture_data(self, input_data: pd.DataFrame, predictions: List[Dict[str, Any]]) -> None:
         """Capture input data and predictions to Delta table."""
         try:
-            # Create a copy of input data
-            data = input_data.copy()
-            
-            # Add prediction information
-            data['prediction'] = [p['prediction'] for p in predictions]
-            data['confidence'] = [p['confidence'] for p in predictions]
-            data['prediction_time'] = [p['prediction_time'] for p in predictions]
-            
-            # Convert to Spark DataFrame with proper schema
+            # Define schema for the Delta table
             prediction_schema = StructType([
                 StructField("island", StringType(), True),
                 StructField("culmen_length_mm", DoubleType(), True),
@@ -197,16 +189,42 @@ class PenguinClassifier:
                 StructField("prediction_time", TimestampType(), True)
             ])
             
-            spark_df = self.spark.createDataFrame(data, schema=prediction_schema)
+            # Create a new DataFrame with the correct column order and types
+            data_dict = {
+                "island": input_data["island"].astype(str),
+                "culmen_length_mm": input_data["culmen_length_mm"].astype(float),
+                "culmen_depth_mm": input_data["culmen_depth_mm"].astype(float),
+                "flipper_length_mm": input_data["flipper_length_mm"].astype(float),
+                "body_mass_g": input_data["body_mass_g"].astype(float),
+                "sex": input_data["sex"].astype(str),
+                "prediction": [p["prediction"] for p in predictions],
+                "confidence": [float(p["confidence"]) for p in predictions],
+                "prediction_time": pd.to_datetime([p["prediction_time"] for p in predictions])
+            }
+            
+            # Create pandas DataFrame with explicit types
+            pdf = pd.DataFrame(data_dict)
+            
+            # Convert to Spark DataFrame with schema
+            spark_df = self.spark.createDataFrame(pdf, schema=prediction_schema)
             
             # Write to Delta table
             table_name = "penguin_predictions"
-            spark_df.write.format("delta").mode("append").saveAsTable(table_name)
+            
+            # Create the table if it doesn't exist
+            spark_df.write \
+                .format("delta") \
+                .mode("append") \
+                .option("mergeSchema", "true") \
+                .saveAsTable(table_name)
             
             logging.info(f"Successfully captured predictions to Delta table: {table_name}")
             
         except Exception as e:
             logging.error(f"Error capturing prediction data: {str(e)}")
+            logging.debug("Data types of input columns:")
+            for col in input_data.columns:
+                logging.debug(f"{col}: {input_data[col].dtype}")
 
 # COMMAND ----------
 
