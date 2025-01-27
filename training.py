@@ -302,67 +302,23 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
         
         # Save the final model and transformers
         with mlflow.start_run(run_name="model-saving", nested=True):
-            # Create example input for model signature
-            example_input = pd.DataFrame({
-                "culmen_length_mm": [39.1],
-                "culmen_depth_mm": [18.7],
-                "flipper_length_mm": [181.0],
-                "body_mass_g": [3750.0],
-                "island": ["Torgersen"],
-                "sex": ["Male"]
-            })
-            
-            # Transform example input to get the correct tensor shape
-            X_example = features_transformer.transform(example_input)
-            
-            # Convert sparse matrix to dense numpy array if needed
-            if scipy.sparse.issparse(X_example):
-                X_example = X_example.toarray()
-            
-            # Create model signature using transformed input
-            import tensorflow as tf
-            model_signature = mlflow.models.infer_signature(
-                X_example,  # Transformed input (dense numpy array)
-                model.predict(X_example)  # Model output
-            )
-            
-            # Save model using MLflow model registry with signature
+            # Log the Keras model - MLflow autolog will handle the model artifacts
             mlflow.keras.log_model(
                 model,
                 "model",
-                registered_model_name="penguin_classifier",
-                signature=model_signature,
-                input_example=X_example.tolist()  # Convert to list for JSON serialization
+                registered_model_name="penguin_classifier"
             )
             
-            # Create transformer signatures and convert to dense if needed
-            X_transformed = features_transformer.transform(example_input)
-            if scipy.sparse.issparse(X_transformed):
-                X_transformed = X_transformed.toarray()
-                
-            features_transformer_signature = mlflow.models.infer_signature(
-                example_input,
-                X_transformed
-            )
-            
-            y_transformed = target_transformer.transform([["Adelie"]])
-            target_transformer_signature = mlflow.models.infer_signature(
-                pd.DataFrame({"species": ["Adelie"]}),
-                y_transformed
-            )
-            
-            # Log transformers as artifacts with signatures
+            # Log transformers as artifacts
             mlflow.sklearn.log_model(
                 target_transformer,
                 "transformers/target_transformer",
-                signature=target_transformer_signature,
                 registered_model_name="penguin_target_transformer"
             )
             
             mlflow.sklearn.log_model(
                 features_transformer,
                 "transformers/features_transformer",
-                signature=features_transformer_signature,
                 registered_model_name="penguin_features_transformer"
             )
             
@@ -382,6 +338,15 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
                 "raw_output_schema": {
                     "prediction": "string",
                     "confidence": "double"
+                },
+                "input_features_info": {
+                    "numeric_features": [
+                        "culmen_length_mm",
+                        "culmen_depth_mm",
+                        "flipper_length_mm",
+                        "body_mass_g"
+                    ],
+                    "categorical_features": ["island", "sex"]
                 }
             }
             mlflow.log_dict(metadata, "metadata.json")
