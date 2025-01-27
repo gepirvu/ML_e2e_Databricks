@@ -304,22 +304,30 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
         with mlflow.start_run(run_name="model-saving", nested=True):
             # Create MLflow schema for model input and output
             from mlflow.types import Schema, ColSpec, DataType
-            
+            from mlflow.types.schema import TensorSpec
+            from tensorflow import TensorShape, dtypes
+
+            # Create input schema with TensorSpec
             input_schema = Schema([
-                ColSpec(DataType.string, "island"),
-                ColSpec(DataType.double, "culmen_length_mm"),
-                ColSpec(DataType.double, "culmen_depth_mm"),
-                ColSpec(DataType.double, "flipper_length_mm"),
-                ColSpec(DataType.double, "body_mass_g"),
-                ColSpec(DataType.string, "sex")
+                TensorSpec(name="island", dtype=dtypes.string, shape=(None,)),
+                TensorSpec(name="culmen_length_mm", dtype=dtypes.float32, shape=(None,)),
+                TensorSpec(name="culmen_depth_mm", dtype=dtypes.float32, shape=(None,)),
+                TensorSpec(name="flipper_length_mm", dtype=dtypes.float32, shape=(None,)),
+                TensorSpec(name="body_mass_g", dtype=dtypes.float32, shape=(None,)),
+                TensorSpec(name="sex", dtype=dtypes.string, shape=(None,))
             ])
-            
+
+            # Keep the output schema unchanged
             output_schema = Schema([
                 ColSpec(DataType.string, "prediction"),
                 ColSpec(DataType.double, "confidence")
             ])
             
-            # Create example input
+            # Create model signature with proper schemas
+            from mlflow.models.signature import ModelSignature
+            signature = ModelSignature(inputs=input_schema, outputs=output_schema)
+            
+            # Create example input and transform it
             example_input = pd.DataFrame({
                 "culmen_length_mm": [39.1],
                 "culmen_depth_mm": [18.7],
@@ -329,16 +337,17 @@ if avg_accuracy >= ACCURACY_THRESHOLD:
                 "sex": ["Male"]
             })
             
-            # Create model signature with proper schemas
-            from mlflow.models.signature import ModelSignature
-            signature = ModelSignature(inputs=input_schema, outputs=output_schema)
+            # Transform example input to tensor format
+            X_example = features_transformer.transform(example_input)
+            if scipy.sparse.issparse(X_example):
+                X_example = X_example.toarray()
             
             # Log the Keras model with signature
             mlflow.keras.log_model(
                 model,
                 "model",
                 signature=signature,
-                input_example=example_input,
+                input_example=X_example,  # Use transformed tensor input
                 registered_model_name="penguin_classifier"
             )
             
