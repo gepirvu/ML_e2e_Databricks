@@ -1,0 +1,385 @@
+{
+  "success": true,
+  "credits_left": 19,
+  "rate_limit_left": 19,
+  "person": {
+    "publicIdentifier": "pirvugeorge",
+    "linkedInIdentifier": "ACoAAAdKAZEBv_Hwhw-4-taZvworNX7VpcUIWAc",
+    "memberIdentifier": "122290577",
+    "linkedInUrl": "https://www.linkedin.com/in/pirvugeorge",
+    "firstName": "Georgian",
+    "lastName": "Pirvu",
+    "headline": "Cloud Lead Engineer, 5 x Azure certified, 2 x Databricks certified \nDatabrick Champion nominated",
+    "location": "Baden, Aargau, Switzerland",
+    "summary": "Experienced Cloud & Data Engineer with a demonstrated history of working in the information technology and services industry. Skilled in Azure infrastructure, CI/CD automation, databases, Spark, ETL/ELT tools, IoT processes and cloud native applications. Strong engineering professional with a Master degree in \"Mathematical modeling in finance and economic analysis\"",
+    "photoUrl": "https://media.licdn.com/dms/image/v2/D4E03AQEts0shWZqMGw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1727429720297?e=1744848000&v=beta&t=ZYJ4WLCUkvfRFhfJlqesmOg1CMv1RzD5MSf6k_BE--I",
+    "backgroundUrl": "https://media.licdn.com/dms/image/v2/D4E16AQFc5Ak2utLV3g/profile-displaybackgroundimage-shrink_350_1400/profile-displaybackgroundimage-shrink_350_1400/0/1699388431212?e=1744848000&v=beta&t=Mp89YwxqFSU5vDa_28jc0ycAYUTuAXYNje2_nEEC_q0",
+    "openToWork": false,
+    "premium": false,
+    "pronoun": "HE_HIM",
+    "showVerificationBadge": true,
+    "creationDate": {
+      "month": 6,
+      "year": 2011
+    },
+    "followerCount": 1413,
+    "positions": {
+      "positionsCount": 6,
+      "positionHistory": [
+        {
+          "title": "Azure Infrastructure Lead",
+          "companyName": "Axpo Group",
+          "companyLocation": "Baden, Aargau, Switzerland · On-site",
+          "description": "Skills: Azure DevOps · Azure Data Factory · Apache Spark · Databricks · GitHub · Microsoft Azure · Terraform · Cloud Applications · Leadership · LangChain",
+          "startEndDate": {
+            "start": {
+              "month": 11,
+              "year": 2023
+            },
+            "end": null
+          },
+          "contractType": "Full-time",
+          "companyLogo": "https://media.licdn.com/dms/image/v2/C4E0BAQFLJ4w60Vvkcg/company-logo_400_400/company-logo_400_400/0/1643955823396/axpo_group_logo?e=1747267200&v=beta&t=qAduJ6I4HWkASXQDMfWFkPLZz9tFQ01uPjP65ZVxNMA",
+          "linkedInUrl": "https://www.linkedin.com/company/79459/",
+          "linkedInId": "79459"
+        },
+        {
+          "title": "Cloud Data Engineer & Solution Architect",
+          "companyName": "INFOMOTION GmbH",
+          "companyLocation": "Stuttgart, Baden-Württemberg, Germany",
+          "description": "Azure Platform deployment and configuration: Terraform, ARM Templates, Biceps, Azure DevOps CI/CD\n\nNetwork architecture: Hub&Spoke topology, hybrid on-premise to cloud\n\nDataflow orchestration and ingestion: Azure Data Factory\n\nData integration and transformation: Azure Data Factory, Databricks(SQL, Scala, Python), Logic App\n\nData storage & Compute : Azure Data Lake, SQL DB, PostgreSQL DB, CosmosDB, Azure Function\n\nMachine Learning: Databricks ML, Azure ML\n\nData serving and virtualization layer: Databricks DWH, SQL DWH, Synapse\n\nData streaming: Databricks Streaming, EventHub, IoT Hub, Azure Stream Analytics\n\nContainers: Docker, Azure Kubernetes\n\nVisualize: PowerBI, Tableau",
+          "startEndDate": {
+            "start": {
+              "month": 1,
+              "year": 2021
+            },
+            "end": {
+              "month": 10,
+              "year": 2023
+            }
+          },
+          "contractType": "Full-time",
+          "companyLogo": "https://media.licdn.com/dms/image/v2/C4E0BAQG8epTcC3X7Wg/company-logo_400_400/company-logo_400_400/0/1652856098719/infomotion_gmbh_logo?e=1747267200&v=beta&t=SoeD9E-r7G24PwZY8bV44IMEr4gcRE1qu3PmGG8LGCE",
+          "linkedInUrl": "https://www.linkedin.com/company/2448429/",
+          "linkedInId": "2448429"
+        },
+        {
+          "title": "Process Development Engineer Telematics",
+          "companyName": "Daimler AG",
+          "companyLocation": "Stuttgart Area, Germany",
+          "description": "- Platform Engineer and Product Owner of Configuration Manager – development of Daimler Truck web application for remote telematics configuration of Daimler trucks\n- Responsible for the prioritization and implementation of new Mercedes-Benz Uptime features in SCRUM, representing the interest of our stakeholders\n- Responsible for several working packages within the development of FOTA (Flashing over the air)\n- Responsible for handling various meetings, workshops, statements of work with internal cross-departments and external partners or suppliers\n- Responsible for building the usecase and the Proof-of-Concept for EDGE Artificial Intelligence on truck, working closely with our partners from USA\n- Involved in the cloud migration of the Mercedes-Benz Uptime backend\n- Project management activities derived from continued business justification and focus on software products\n- Representing the department at different conferences intern and extern",
+          "startEndDate": {
+            "start": {
+              "month": 6,
+              "year": 2019
+            },
+            "end": {
+              "month": 12,
+              "year": 2020
+            }
+          },
+          "contractType": "Full-time",
+          "companyLogo": "https://media.licdn.com/dms/image/v2/D4E0BAQFCUz3w4RDVtw/company-logo_400_400/company-logo_400_400/0/1719907715437/mercedes_benz_ag_logo?e=1747267200&v=beta&t=Q9KoZ3kemY3cIdI27iiw2UlQ3t4Mr-DASWCdgJ-7WPI",
+          "linkedInUrl": "https://www.linkedin.com/company/5383634/",
+          "linkedInId": "5383634"
+        },
+        {
+          "title": "Business Intelligence Architect",
+          "companyName": "Daimler Mobility AG",
+          "companyLocation": "Stuttgart Area, Germany",
+          "description": "- Aufsetzen des logischen Datenmodells für Standard Daten Modell SDM für das neue, zentrale DFS Datawarehouse ourBI \n- Defintion der Methodik für das SDM Datenmodel zusammen mit der IT \n- Sammlung und Formulierung von neuen Datenfelddefinitionen für SDM \n- Abstimmung mit den Stakeholdern Controlling, Sales, Risiko Management und den lokalen Gesellschaften \n\n- Sicherstellung der Verfügbarkeit der Daten für die Business Partner im System eRDR (Extended Risk Data Repository) \n- Sicherstellung der monatlichen Datenladung der internationalen DFS-Gesellschaften \n- Unterstützung und Support der Gesellschaften bei Problemen im Rahmen des Datenlade-Prozesses\n- Unterstützung bei der Automatisierung des Prozesses Verbesserung der Datenqualität Erarbeitungen von Verbesserungsmöglichkeiten der Datenqualität, basierend auf den Erfahrungen aus den Rückmeldungen der Gesellschaften und Business Partner \n- Abstimmung mit IT und Gesellschaften über Umsetzbarkeit dieser Verbesserungen \n-Umsetzung über Workshops mit den Gesellschaften, Zurverfügungstellung von Schulungsunterlagen und Einsteuerung entsprechender Change Requests \n\n- Fachliche, organisatorische und methodische Weiterentwicklung des Teams \n- Einbringen neuer Ideen und Verbesserungen um das Team weiter nach vorne zu bringen \n- Support des Transformationsprozess bei der Umwandlung des Teams in eine agile Swarm-Struktur",
+          "startEndDate": {
+            "start": {
+              "month": 4,
+              "year": 2017
+            },
+            "end": {
+              "month": 6,
+              "year": 2019
+            }
+          },
+          "contractType": "Full-time",
+          "companyLogo": "https://media.licdn.com/dms/image/v2/D4E0BAQHDfIGbX8MNfg/company-logo_400_400/company-logo_400_400/0/1722502099048/mercedes_benz_mobility_logo?e=1747267200&v=beta&t=TQMUzsktGW_gma-tvFGOlYlAr2_duboH5tCJf_b_soc",
+          "linkedInUrl": "https://www.linkedin.com/company/11405198/",
+          "linkedInId": "11405198"
+        },
+        {
+          "title": "Business Intelligence Architect - Finance, Legal & Tax",
+          "companyName": "DACHSER GmbH & Co. KG",
+          "companyLocation": "Kempten",
+          "description": "Propose proper Business Intelligence solution and agree with internal customers on user requirements, deliverables and time frame for implementation\n\tDevelop the Business Intelligence solution according to plan (using Microsoft Technology):\n\n•\tCollect business requirements\n•\tDetermine casual factors\n•\tDevelop database architecture\n•\tImplement staging areas to troubleshoot dataflow, data life cycle\n•\tMulti-level hierarchies within attribute relationships\n•\tSnapshot of commonly accessed reports\n•\tDevelop ETL process with SQL Server Integration Services\n•\tDevelop data transformations inside data warehouse\n•\tCreate, deploy, publish and manage custom reports using SQL Server Reporting Services\n•\tDesign OLAP cube with SQL Server Analysis Services \n•\tModel predictive or what-if-analysis and track the impact of the business decisions",
+          "startEndDate": {
+            "start": {
+              "month": 6,
+              "year": 2014
+            },
+            "end": {
+              "month": 3,
+              "year": 2017
+            }
+          },
+          "companyLogo": "https://media.licdn.com/dms/image/v2/C4E0BAQGqcguZj0G2LA/company-logo_400_400/company-logo_400_400/0/1653653381827/dachser_logo?e=1747267200&v=beta&t=LahqP7qX5Oi-0aDXJrje0KwJ6Iw2fs8pwwYZIuw-dqI",
+          "linkedInUrl": "https://www.linkedin.com/company/40395/",
+          "linkedInId": "40395"
+        },
+        {
+          "title": "Software Engineer",
+          "companyName": "Senior Software",
+          "companyLocation": "Bucharest, Romania",
+          "description": "BUSINESS INTELLIGENCE:\nPropose proper BI solution and agree with internal customers on user\nrequirements, deliverables and time frame for implementation\nDevelop the BI solution according to plan (Microsoft Technology):\n-Collect business requirements\n-Develop database architecture\n-Develop ETL process with Sql Server Integration Services\n-Develop data transformations inside data warehouse\n-Custom reports creation with Sql Server Reporting Services\n-OLAP cube design with Sql Server Analysis Services\n\nSUPPORT Department\n-Responsible for systems support SeniorERP, SeniorCRM, Senior BI tasks\nallocated according to positions.\n-Identify the nature of the problem\n-Propose solutions (both mail and telephone) to problems arising from customers\n-Develops specialized documentation\n-Input data corresponding tasks in CRM\n-Activities that the procedures under existing\n\nTESTING Department:\n-Use of Test Case Management application in Visual Studio 2010\n-Fixed test case associated sites for the latest version of application (one of\nimplementation)\n",
+          "startEndDate": {
+            "start": {
+              "month": 9,
+              "year": 2011
+            },
+            "end": {
+              "month": 4,
+              "year": 2014
+            }
+          },
+          "companyLogo": "https://media.licdn.com/dms/image/v2/C560BAQF_QjAduKhLVA/company-logo_400_400/company-logo_400_400/0/1630565463103/senior_software_logo?e=1747267200&v=beta&t=-5B1GjqiEQFpjah2aC6hChDUGgVTw1fWS_g-gDXS6zc",
+          "linkedInUrl": "https://www.linkedin.com/company/77064/",
+          "linkedInId": "77064"
+        }
+      ]
+    },
+    "schools": {
+      "educationsCount": 2,
+      "educationHistory": [
+        {
+          "degreeName": "Master's degree",
+          "fieldOfStudy": "Mathematical modeling in finance and economic analysis",
+          "linkedInUrl": "https://www.linkedin.com/search/results/all/?keywords=Ovidius+University",
+          "schoolLogo": null,
+          "schoolName": "Ovidius University",
+          "startEndDate": {
+            "start": {
+              "month": 1,
+              "year": 2011
+            },
+            "end": {
+              "month": 1,
+              "year": 2013
+            }
+          }
+        },
+        {
+          "degreeName": "Bachelor's degree",
+          "fieldOfStudy": "Informatics",
+          "linkedInUrl": "https://www.linkedin.com/search/results/all/?keywords=Ovidius+University",
+          "schoolLogo": null,
+          "schoolName": "Ovidius University",
+          "startEndDate": {
+            "start": {
+              "month": 1,
+              "year": 2008
+            },
+            "end": {
+              "month": 1,
+              "year": 2011
+            }
+          }
+        }
+      ]
+    },
+    "skills": [
+      "LangChain",
+      "Leadership",
+      "Databricks",
+      "Business Intelligence",
+      "Microsoft SQL Server",
+      "Data Warehouse Architecture",
+      "Data Analysis",
+      "Database Administration",
+      "ERP Software",
+      "Analysis Services",
+      "Relational Databases",
+      "ETL Tools",
+      "Reporting & Analysis",
+      "SSIS",
+      "CRM",
+      "Databases",
+      "Business Analysis",
+      "SSRS",
+      "Data Warehousing",
+      "ETL",
+      "OLAP",
+      "Visual Studio",
+      "Business Requirements",
+      "Controlling",
+      "TM1",
+      "Data Governance",
+      "Data Quality",
+      "Dimensional Modeling",
+      "R",
+      "Consulting",
+      "Customer Relationship Management (CRM)",
+      "Extract, Transform, Load (ETL)",
+      "SQL Server Integration Services (SSIS)",
+      "SQL Server Reporting Services (SSRS)",
+      "Microsoft Azure",
+      "Cloud Computing",
+      "Cloud Applications",
+      "SQL Azure",
+      "Azure Cosmos DB",
+      "Azure Data Lake"
+    ],
+    "languages": [
+      "English",
+      "German",
+      "Romanian",
+      "Spanish"
+    ],
+    "recommendations": {
+      "recommendationsCount": 0,
+      "recommendationHistory": []
+    },
+    "certifications": {
+      "certificationsCount": 15,
+      "certificationHistory": [
+        {
+          "name": "Databricks Solutions Architect Champion",
+          "organizationName": "Databricks",
+          "organizationUrl": "https://www.linkedin.com/company/3477522/",
+          "issuedDate": "Issued Jul 2023"
+        },
+        {
+          "name": "Databricks Certified Data Engineer Professional",
+          "organizationName": "Databricks",
+          "organizationUrl": "https://www.linkedin.com/company/3477522/",
+          "issuedDate": "Issued May 2023 · Expires May 2025"
+        },
+        {
+          "name": "Microsoft Certified: Azure Data Engineer Associate",
+          "organizationName": "Microsoft",
+          "organizationUrl": "https://www.linkedin.com/company/1035/",
+          "issuedDate": "Issued Oct 2020 · Expired Oct 2022"
+        },
+        {
+          "name": "Microsoft Certified: Azure Data Engineer Associate",
+          "organizationName": "Microsoft",
+          "organizationUrl": "https://www.linkedin.com/company/1035/",
+          "issuedDate": "Issued Oct 2020 · Expired Oct 2023"
+        },
+        {
+          "name": "Docker Quick Start",
+          "organizationName": "Linux Academy",
+          "organizationUrl": "https://www.linkedin.com/company/3761108/",
+          "issuedDate": "Issued Aug 2020"
+        },
+        {
+          "name": "Kubernetes Essentials",
+          "organizationName": "Linux Academy",
+          "organizationUrl": "https://www.linkedin.com/company/3761108/",
+          "issuedDate": "Issued Aug 2020"
+        },
+        {
+          "name": "Microsoft Azure Exam DP-201 - Designing an Azure Data Solution",
+          "organizationName": "Linux Academy",
+          "organizationUrl": "https://www.linkedin.com/company/3761108/",
+          "issuedDate": "Issued Feb 2020"
+        },
+        {
+          "name": "AZURE Concepts",
+          "organizationName": "Linux Academy",
+          "organizationUrl": "https://www.linkedin.com/company/3761108/",
+          "issuedDate": "Issued May 2019"
+        },
+        {
+          "name": "Introduction to R for Finance Course",
+          "organizationName": "DataCamp",
+          "organizationUrl": "https://www.linkedin.com/company/3227175/",
+          "issuedDate": "Issued Nov 2018"
+        },
+        {
+          "name": "Certificate Implementing a Data Warehouse with SQL Server",
+          "organizationName": "Microsoft Virtual Academy",
+          "organizationUrl": null,
+          "issuedDate": "Issued Nov 2015"
+        },
+        {
+          "name": "Reimagine Finance BI for Sales Organizations",
+          "organizationName": "Microsoft Virtual Academy",
+          "organizationUrl": null,
+          "issuedDate": "Issued Nov 2015"
+        },
+        {
+          "name": "Java Fundamentals",
+          "organizationName": "Cisco Academy",
+          "organizationUrl": null,
+          "issuedDate": "Issued Nov 2010"
+        },
+        {
+          "name": "Microsoft Certified: DevOps Engineer Expert",
+          "organizationName": "Microsoft",
+          "organizationUrl": "https://www.linkedin.com/company/1035/",
+          "issuedDate": "Issued Oct 2023 · Expired Oct 2024"
+        },
+        {
+          "name": "Microsoft Certified: Azure Administrator Associate",
+          "organizationName": "Microsoft",
+          "organizationUrl": "https://www.linkedin.com/company/1035/",
+          "issuedDate": "Issued Sep 2023 · Expired Sep 2024"
+        },
+        {
+          "name": "Databricks Certified Data Engineer Associate",
+          "organizationName": "Databricks",
+          "organizationUrl": "https://www.linkedin.com/company/3477522/",
+          "issuedDate": "Issued Aug 2022 · Expired Aug 2024"
+        }
+      ]
+    },
+    "testScores": {
+      "testScoresCount": 0,
+      "testScoreHistory": []
+    },
+    "volunteeringExperiences": {
+      "volunteeringExperiencesCount": 0,
+      "volunteeringExperienceHistory": []
+    }
+  },
+  "company": {
+    "linkedInId": "79459",
+    "name": "Axpo Group",
+    "universalName": "axpo-group",
+    "linkedInUrl": "https://www.linkedin.com/company/79459",
+    "employeeCount": 4446,
+    "followerCount": 68377,
+    "employeeCountRange": {
+      "start": 5001,
+      "end": 10000
+    },
+    "websiteUrl": "http://www.axpo.com",
+    "tagline": null,
+    "description": "Axpo is driven by a single purpose – to enable a sustainable future through innovative energy solutions.  Axpo is Switzerland's largest energy producer and an international leader in energy trading and the marketing of solar and wind power. Axpo combines the experience and expertise of more than 7,000 employees who are driven by a passion for innovation, collaboration and impactful change.  Using cutting-edge technologies, Axpo innovates to meet the evolving needs of its customers in over 30 countries across Europe, North America and Asia.\n\nAround 7,000 employees work for Axpo in 150 different roles – this means a wide range of job entry and career opportunities for you. Bring along your knowledge, your enthusiasm and your dedication – and take charge. Visit our career website: www.axpo.com/career",
+    "industry": "Utilities",
+    "phone": null,
+    "specialities": [],
+    "headquarter": {
+      "city": "Baden",
+      "country": "CH",
+      "postalCode": "5401",
+      "geographicArea": null,
+      "street1": "Parkstrasse 23",
+      "street2": null
+    },
+    "logo": "https://media.licdn.com/dms/image/v2/C4E0BAQFLJ4w60Vvkcg/company-logo_400_400/company-logo_400_400/0/1643955823396/axpo_group_logo?e=1747267200&v=beta&t=qAduJ6I4HWkASXQDMfWFkPLZz9tFQ01uPjP65ZVxNMA",
+    "fundingData": {
+      "numberOfFundingRounds": 2,
+      "crunchbaseOrganizationUrl": "https://www.crunchbase.com/organization/axpo-group?utm_source=linkedin&utm_medium=referral&utm_campaign=linkedin_companies&utm_content=profile_cta",
+      "lastFundingRound": {
+        "fundingType": "Debt financing",
+        "moneyRaised": {
+          "amount": "7574241088",
+          "currencyCode": "USD"
+        },
+        "fundingRoundUrl": "https://www.crunchbase.com/funding_round/axpo-group-debt-financing--ebb38a1e?utm_source=linkedin&utm_medium=referral&utm_campaign=linkedin_companies&utm_content=last_funding",
+        "announcedOn": "2024-02-21T00:00:00.000Z",
+        "numberOfOtherInvestors": 0,
+        "investorsUrl": "https://www.crunchbase.com/funding_round/axpo-group-debt-financing--ebb38a1e?utm_source=linkedin&utm_medium=referral&utm_campaign=linkedin_companies&utm_content=all_investors",
+        "leadInvestors": []
+      }
+    },
+    "backgroundUrl": "https://media.licdn.com/dms/image/v2/D4E1BAQEtvCai0mOPeA/company-background_10000/company-background_10000/0/1724052527403/axpo_group_cover?e=1739800800&v=beta&t=FSxqMsHjIBLFUSgCk0Qy-OeIjx-zTvX5WIRyTBtYNa8"
+  }
+}
